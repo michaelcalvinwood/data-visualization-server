@@ -7,6 +7,7 @@ const express = require('express');
 const https = require('https');
 const cors = require('cors');
 const fs = require('fs');
+socketio = require('socket.io');
 
 const app = express();
 app.use(express.static('public'));
@@ -27,4 +28,14 @@ const httpsServer = https.createServer({
     console.log(`HTTPS Server running on port ${listenPort}`);
 });
 
+/*
+ * SocketIo Server
+ */
+
+const io = socketio(httpsServer, {cors: {origin: "*"}});
+
+io.on('connection', (socket) => {
+  console.log('socketio connection', socket.id);
+  socket.on('echo', (msg) => socket.emit('echo', msg));
+});
 
