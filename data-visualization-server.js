@@ -1,41 +1,33 @@
-const listenPort = 443;
-const hostname = 'dv-sql.pymnts.com'
-const privateKeyPath = `/etc/ssl-keys/pymnts.com/pymnts.key`;
-const fullchainPath = `/etc/ssl-keys/pymnts.com/pymnts.com.pem`;
-
-const express = require('express');
-const https = require('https');
 const cors = require('cors');
-const fs = require('fs');
-socketio = require('socket.io');
+const express = require('express');
+const { initServer } = require('./utils/server');
+const { initSocket } = require('./utils/socket');
+const { getUniversalData, getSingleChartData } = require('./filters');
 
 const app = express();
-app.use(express.static('public'));
-app.use(express.json({limit: '200mb'})); 
+
 app.use(cors());
 
-app.get('/', (req, res) => {
-    res.send('Hello, World!');
+app.use(
+  express.json({
+    limit: '200mb'
+  })
+);
+
+const server = initServer(app);
+
+const io = initSocket(server, socket => {
+  console.log('A user connected =>', socket.id);
+
+  socket.on('initFilters', async () => {
+    socket.emit('initFilters', await getUniversalData());
+  });
+
+  socket.on('getSingleChartData', async filters => {
+    socket.emit('getSingleChartData', await getSingleChartData(filters));
+  });
+
+  socket.on('disconnect', () => {
+    console.log('A user disconnected =>', socket.id);
+  });
 });
-
-const httpsServer = https.createServer({
-    key: fs.readFileSync(privateKeyPath),
-    cert: fs.readFileSync(fullchainPath),
-  }, app);
-  
-
-  httpsServer.listen(listenPort, '0.0.0.0', () => {
-    console.log(`HTTPS Server running on port ${listenPort}`);
-});
-
-/*
- * SocketIo Server
- */
-
-const io = socketio(httpsServer, {cors: {origin: "*"}});
-
-io.on('connection', (socket) => {
-  console.log('socketio connection', socket.id);
-  socket.on('echo', (msg) => socket.emit('echo', msg));
-});
-
