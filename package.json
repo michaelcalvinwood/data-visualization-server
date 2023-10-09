@@ -4,7 +4,7 @@
   "description": "",
   "main": "data-visualization-server.js",
   "scripts": {
-    "dev": "NODE_ENV=dev nodemon data-visualization-server.js"
+    "dev": "cross-env NODE_ENV=dev nodemon data-visualization-server.js"
   },
   "author": "Michael Wood",
   "license": "SEE LICENSE IN license.md",
@@ -17,6 +17,7 @@
     "socket.io": "^4.7.2"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "nodemon": "^3.0.1"
   }
 }
